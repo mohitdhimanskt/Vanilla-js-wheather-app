@@ -16,7 +16,14 @@ window.addEventListener('load',()=> {
         .then(response => {
          return response.json();
         })
+        .then(data => {
+            const {temperature, summary} = data.currently;
+            console.log(tempdegree);
+            tempdegree.textContent = temperature;
+            tempdescription.textContent = summary;
+            locationtimezone.textContent = data.timezone;
+        })
         })
 
     }
-})
+});
