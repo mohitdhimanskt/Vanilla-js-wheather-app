@@ -14,3 +14,10 @@ body{
     font-family: sans-serif;
     color: white; 
 }
+.location, .temperature {
+    height: 30vh;
+    width: 30%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
