@@ -25,7 +25,7 @@ $(document).ready(function(){
       } else {
       $("#spinner").show();
       $.ajax(
-      "https://crossorigin.me/http://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=" + units + "&" + id, {
+      "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=" + units + "&" + id, {
         datatype: "jsonp", 
         error: function(){
           $("#modalBack").fadeIn(300); 
