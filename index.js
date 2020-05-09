@@ -1,57 +1,121 @@
-window.addEventListener('load',()=> {
-    let long;
-    let lat;
-    let tempdegree = document.querySelector('.tempdegree');
-    let tempdescription = document.querySelector('.tempdescription');
-    let locationtimezone = document.querySelector('.location-timezone');
-    let temperatureSection = document.querySelector('.temperature');
-    const temperatureSpan = document.querySelector('.temperature span')
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition
-        (postion => {
-          long = position.coords.longitude;
-          lat = position.coords.latitude;
-          function geoPosition(position){
-              var lat = position.coords.latitude;
-              var lng = position.coords.langnitude;
-              alert("lat:" + lat + "lng:" + lng);
-              catlatlng(lat, lng);
+$(document).ready(function(){
+
+    var id ="APPID=ba02317420a71b482c575129ae75f584",
+    units = "imperial",
+    city = " ",
+    weatherIconCode = "",
+    scale,
+    rawTemp; 
+    
+    
+    $("#textBox").focus();
+    //$("#spinner").hide();
+    
+    //on enter, trigger click event
+    $("#textBox").keyup(function(event){
+        if(event.keyCode == 13){
+            $("#getWeatherBtn").click();
+        }
+    });
+    //main click event to get weather
+    $('#getWeatherBtn').on('click', function(){
+      city = $("input").val(); 
+      if(!city) {
+        return; 
+      } else {
+      $("#spinner").show();
+      $.ajax(
+      "https://crossorigin.me/http://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=" + units + "&" + id, {
+        datatype: "jsonp", 
+        error: function(){
+          $("#modalBack").fadeIn(300); 
+          $("#spinner").hide();
+        },
+        success: function(data) {
+        $("#spinner").hide();
+          if(scale == " F") {
+            scale = " F";
+            rawTemp = data.main.temp;
+          } else {
+            scale = " C";
+            rawTemp = ((data.main.temp - 32) / 1.8);
           }
-          const proxy = 'https://cors-anywhere.herokuapp.com/';
-          const api = `${proxy}https://api.darksky.net/forecast/323cc627b42b9e049e3ac7597d8a70f5/${lat},${long}`;
-    fetch(api)
-        .then(response => {
-         return response.json();
-        })
-        .then(data => {
-            const {temperature, summary ,icon} = data.currently;
-            console.log(tempdegree);
-            tempdegree.textContent = temperature;
-            tempdescription.textContent = summary;
-            locationtimezone.textContent = data.timezone;
-
-            let celcius = (temperature -32) * (5 / 9);
-
-            setIcons(icon, document.querySelector('.icon'));
-
-            temperatureSection.addEventListener('click', () =>{
-                if(temperatureSpan.textContent === 'F'){
-                    temperatureSpan.textContent = 'C';
-                    temperaturedegree.textContent = Math.floor(celcius);
-                } else{
-                    temperatureSpan.textContent = 'F';
-                    temperaturedegree.textContent =temperature;
-
-                }
-            })
-        })
-        })
-
+        var weather = data.weather[0].description;
+        weather = (weather[0].toUpperCase() + weather.slice(1)); 
+     
+       $("#city").text(data.name); 
+       $("#weather").text(weather);
+       $("#temp").text(Math.round(rawTemp));
+       $("#scale").text("\u00B0" + scale);
+       setWeatherIcon(weather); 
+       $("input").val(""); 
+       $("#textBox").focus();
+     },
+        timeout: 7000
+      }); 
+      } //else
+    });
+    
+ 
+    function setWeatherIcon(weath){
+      $("i").removeClass(weatherIconCode);
+      switch(weath) {
+        case "Clear sky":
+            weatherIconCode = "wi wi-day-sunny";
+            break;
+        case "Broken clouds":
+        case "Few clouds":
+        case "Scattered clouds":
+            weatherIconCode = "wi wi-day-cloudy";
+            break;
+        case "Light rain":
+            weatherIconCode = "wi wi-showers";
+            break;
+        case "Overcast clouds":
+            weatherIconCode = "wi wi-cloudy";
+            break;
+        case "Mist":
+        case "Fog":
+            weatherIconCode = "wi wi-day-fog";
+            break;
+         case "Snow":
+            weatherIconCode = "wi wi-snow";
+            break;
+        default:
+            weatherIconCode = "wi wi-cloud"; 
     }
-    function setIcons(icon, iconID){
-        const skycons = new Skycons({color: "white"});
-        const currentIcon = icon.replace(/-/g,"-").toUpperCase();
-        skycons.play();
-        return skycons.set(iconID,skycons[currentIcon]);
+      $("i").addClass(weatherIconCode);
+     return; 
     }
-});
+    
+     
+    $("#scaleBtn").on("click", function(){
+      if(scale == " F"){
+        rawTemp = ((rawTemp - 32) / 1.8)
+         $("#temp").text(Math.round(rawTemp)); 
+        scale = " C"; 
+        $("#scale").text("\u00B0" + scale)
+      } else if(scale == " C") {
+        rawTemp = ((rawTemp * 1.8) + 32)
+        $("#temp").text(Math.round(rawTemp));
+        scale = " F";
+        $("#scale").text("\u00B0" + scale);
+      } else {
+        $("#scale").text("-");
+      }
+      $("#textBox").focus();
+    }); 
+    
+     
+    $("#exitModal").on("click", function(){
+      $("#modalBack").fadeOut(300);
+      $("#textBox").val("");
+      $("#textBox").focus(); 
+    });
+    
+      
+      
+    }); 
+      
+    
+    
